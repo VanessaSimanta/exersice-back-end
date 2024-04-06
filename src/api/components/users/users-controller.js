@@ -50,6 +50,18 @@ async function createUser(request, response, next) {
     const name = request.body.name;
     const email = request.body.email;
     const password = request.body.password;
+    const password_confirm = request.body.password_confirm;
+  
+    //make sure confirm password dengan password yang di input sama
+    //kalo ga sama throw error
+    if (password !== password_confirm) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        'different password'
+      );
+    }
+
+    //duplicate email
     const isDuplicate = await usersService.duplicateEmail(email);
     if (isDuplicate) {
       throw errorResponder(
@@ -57,6 +69,8 @@ async function createUser(request, response, next) {
         'Failed to create user'
       );
     }
+
+    //create user
     const success = await usersService.createUser(name, email, password);
     if (!success) {
       throw errorResponder(
@@ -129,10 +143,50 @@ async function deleteUser(request, response, next) {
   }
 }
 
+//function untuk patch user
+async function patchUser(request, response, next) {
+  try {
+    const id = request.params.id;
+    const password_lama = request.body.password_lama;
+    const password_baru = request.body.password_baru;
+    const password_confirm = request.body.password_confirm;
+    const isDiffrent = await usersService.diffrentPass(password_lama);
+    //kalo password lama beda sama yang di database throw error
+    if (isDiffrent) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        '"password lama" is diffrent'
+      );
+    }
+
+    //password baru sama password confirm harus sama atau ga throw error
+    if (password_confirm!== password_baru) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        'different password'
+      );
+    }
+
+    //untuk pacth password
+    const success = await usersService.patchUser(id, password_lama, password_baru, password_confirm);
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to update password'
+      );
+    }
+  
+    return response.status(200).json({ id });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUser,
   deleteUser,
+  patchUser,
 };

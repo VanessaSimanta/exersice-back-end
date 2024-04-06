@@ -1,4 +1,7 @@
+const passport = require('passport');
 const { User } = require('../../../models');
+const { password } = require('../../../models/users-schema');
+const bcrypt = require('bcrypt');
 
 /**
  * Get a list of users
@@ -80,6 +83,22 @@ async function deleteUser(id) {
   return User.deleteOne({ _id: id });
 }
 
+
+//untuk update password dengan password baru
+async function patchUser(id, password_lama, password_baru, password_confirm) {
+  return User.updateOne(
+    {
+      _id: id,
+    },
+    {
+      $set: {
+        password : password_baru,
+      },
+    }
+  );
+}
+
+
 module.exports = {
   getUsers,
   getUser,
@@ -87,4 +106,5 @@ module.exports = {
   updateUser,
   deleteUser,
   checkDuplicateEmail,
+  patchUser,
 };
