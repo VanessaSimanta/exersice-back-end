@@ -1,7 +1,7 @@
 const passport = require('passport');
 const { User } = require('../../../models');
 const { password } = require('../../../models/users-schema');
-const bcrypt = require('bcrypt');
+const { passwordMatched } = require('../../../utils/password');
 
 /**
  * Get a list of users
@@ -45,12 +45,11 @@ async function createUser(name, email, password) {
 
 //check adanya duplicated email
 async function checkDuplicateEmail(email) {
-  const data = await User.find({email: email});
+  const data = await User.find({ email: email });
   if (data.length > 0) {
     return true;
   }
   return false;
-  
 }
 
 /**
@@ -83,7 +82,14 @@ async function deleteUser(id) {
   return User.deleteOne({ _id: id });
 }
 
-
+//cek password matched or not
+async function diffrentPass(password_lama) {
+  const pass = await passwordMatched(password_lama, User.password);
+  if (pass.length > 0) {
+    return false;
+  }
+  return true;
+}
 //untuk update password dengan password baru
 async function patchUser(id, password_lama, password_baru, password_confirm) {
   return User.updateOne(
@@ -92,12 +98,11 @@ async function patchUser(id, password_lama, password_baru, password_confirm) {
     },
     {
       $set: {
-        password : password_baru,
+        password: password_baru,
       },
     }
   );
 }
-
 
 module.exports = {
   getUsers,
@@ -107,4 +112,5 @@ module.exports = {
   deleteUser,
   checkDuplicateEmail,
   patchUser,
+  diffrentPass,
 };

@@ -51,14 +51,11 @@ async function createUser(request, response, next) {
     const email = request.body.email;
     const password = request.body.password;
     const password_confirm = request.body.password_confirm;
-  
+
     //make sure confirm password dengan password yang di input sama
     //kalo ga sama throw error
     if (password !== password_confirm) {
-      throw errorResponder(
-        errorTypes.INVALID_PASSWORD,
-        'different password'
-      );
+      throw errorResponder(errorTypes.INVALID_PASSWORD, 'different password');
     }
 
     //duplicate email
@@ -160,22 +157,24 @@ async function patchUser(request, response, next) {
     }
 
     //password baru sama password confirm harus sama atau ga throw error
-    if (password_confirm!== password_baru) {
-      throw errorResponder(
-        errorTypes.INVALID_PASSWORD,
-        'different password'
-      );
+    if (password_confirm !== password_baru) {
+      throw errorResponder(errorTypes.INVALID_PASSWORD, 'different password');
     }
 
     //untuk pacth password
-    const success = await usersService.patchUser(id, password_lama, password_baru, password_confirm);
+    const success = await usersService.patchUser(
+      id,
+      password_lama,
+      password_baru,
+      password_confirm
+    );
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
         'Failed to update password'
       );
     }
-  
+
     return response.status(200).json({ id });
   } catch (error) {
     return next(error);

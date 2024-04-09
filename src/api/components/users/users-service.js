@@ -1,6 +1,5 @@
 const usersRepository = require('./users-repository');
 const { hashPassword } = require('../../../utils/password');
-const { passwordMatched } = require('../../../utils/password');
 
 /**
  * Get list of users
@@ -54,7 +53,6 @@ async function createUser(name, email, password) {
   const hashedPassword = await hashPassword(password);
   try {
     await usersRepository.createUser(name, email, hashedPassword);
-    
   } catch (err) {
     return null;
   }
@@ -118,13 +116,10 @@ async function deleteUser(id) {
 
 async function diffrentPass(password_lama) {
   try {
-    await passwordMatched(password_lama, User.password);
-    
+    await usersRepository.diffrentPass;
   } catch (err) {
-    return null;
+    return err;
   }
-
-  return true;
 }
 
 async function patchUser(id, password_lama, password_baru, password_confirm) {
@@ -139,8 +134,12 @@ async function patchUser(id, password_lama, password_baru, password_confirm) {
   // Hash password
   const hashedPassword = await hashPassword(password_baru);
   try {
-    await usersRepository.patchUser(id, password_lama, hashedPassword, password_confirm);
-    
+    await usersRepository.patchUser(
+      id,
+      password_lama,
+      hashedPassword,
+      password_confirm
+    );
   } catch (err) {
     return null;
   }
